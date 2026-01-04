@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation | CodeX IDE</title>
+    <link rel="stylesheet" href="index.css">
+    <style>
+        .docs-container {
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 20px;
+            line-height: 1.8;
+        }
+        .docs-section {
+            margin-bottom: 60px;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+        code {
+            background: #000;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #d2a8ff;
+        }
+        .tech-tag {
+            display: inline-block;
+            background: #23863633;
+            color: #238636;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <nav style="display: flex; justify-content: space-between; align-items: center; padding: 20px 60px; background: var(--card-bg); border-bottom: 1px solid var(--border-color);">
+        <div style="font-weight: bold; color: var(--accent-hover); font-size: 1.6rem;">CodeX</div>
+        <div style="display: flex; gap: 30px;">
+            <a href="index.html" style="color: white; text-decoration: none;">Home</a>
+            <a href="editor.html" style="color: white; text-decoration: none;">Editor</a>
+            <a href="dashboard.html" style="color: white; text-decoration: none;">My Snippets</a>
+            <a href="docs.html" style="color: white; text-decoration: none; border-bottom: 2px solid var(--accent-hover);">Docs</a>
+        </div>
+    </nav>
+
+    <div class="docs-container">
+        <h1 style="font-size: 2.5rem; margin-bottom: 10px;">Documentation</h1>
+        <p style="color: var(--text-secondary); margin-bottom: 40px;">Understanding the CodeX Cloud Infrastructure.</p>
+
+        <section class="docs-section">
+            <span class="tech-tag">BACKEND</span>
+            <h2>Isolated Execution (Sandboxing)</h2>
+            <p>Every time you click <strong>Run</strong>, CodeX triggers a secure workflow. Your code is not executed on our main server. Instead, it is isolated inside a <strong>Docker Container</strong>.</p>
+            <ul>
+                <li><strong>Resource Limits:</strong> Containers are capped at 128MB RAM to prevent memory leaks.</li>
+                <li><strong>Network Isolation:</strong> Outbound network access is disabled for user code.</li>
+                <li><strong>Auto-Cleanup:</strong> Containers and temporary files are destroyed immediately after execution.</li>
+            </ul>
+        </section>
+
+        
+
+        <section class="docs-section">
+            <span class="tech-tag">NETWORKING</span>
+            <h2>The Interactive Terminal</h2>
+            <p>CodeX uses <strong>WebSockets (Socket.io)</strong> to handle the communication between your browser and the Linux environment. Unlike traditional compilers that wait for the code to finish, CodeX streams data line-by-line.</p>
+            <p>This allows for <code>scanf()</code> in C or <code>input()</code> in Python to work just like a local terminal.</p>
+        </section>
+
+        <section class="docs-section">
+            <span class="tech-tag">VERSIONS</span>
+            <h2>Compiler Specifications</h2>
+            <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                <tr style="border-bottom: 1px solid var(--border-color); text-align: left;">
+                    <th style="padding: 10px;">Language</th>
+                    <th style="padding: 10px;">Compiler/Runtime</th>
+                </tr>
+                <tr>
+                    <td style="padding: 10px;">C / C++</td>
+                    <td style="padding: 10px;">GCC 11.4.0 (Ubuntu)</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px;">Python</td>
+                    <td style="padding: 10px;">Python 3.10.12</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px;">Java</td>
+                    <td style="padding: 10px;">OpenJDK 17.0.8</td>
+                </tr>
+            </table>
+        </section>
+    </div>
+
+</body>
+</html>

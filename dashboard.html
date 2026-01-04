@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Dashboard | CodeX</title>
+    <link rel="stylesheet" href="index.css">
+    <style>
+        .dashboard-wrapper {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        .stats-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 20px;
+        }
+        #search-bar {
+            width: 100%;
+            max-width: 400px;
+            padding: 12px 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: white;
+            outline: none;
+            font-size: 14px;
+        }
+        #search-bar:focus { border-color: var(--accent-hover); }
+        
+        .empty-state {
+            padding: 100px;
+            text-align: center;
+            color: var(--text-secondary);
+        }
+        .hidden { display: none; }
+        
+        /* Grid layout for snippets */
+        #snippets-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .snippet-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            border-radius: 10px;
+            transition: 0.3s;
+        }
+        .snippet-card:hover { border-color: var(--accent-hover); }
+    </style>
+</head>
+<body>
+
+    <nav style="display: flex; justify-content: space-between; align-items: center; padding: 20px 60px; background: var(--card-bg); border-bottom: 1px solid var(--border-color);">
+        <div style="font-weight: bold; color: var(--accent-hover); font-size: 1.6rem; cursor:pointer;" onclick="window.location.href='index.html'">CodeX</div>
+        <div style="display: flex; gap: 30px; align-items: center;">
+            <a href="index.html" style="color: white; text-decoration: none;">Home</a>
+            <a href="editor.html" style="color: white; text-decoration: none;">Editor</a>
+            <a href="dashboard.html" style="color: white; text-decoration: none; border-bottom: 2px solid var(--accent-hover);">My Snippets</a>
+            <div id="nav-auth"></div>
+        </div>
+    </nav>
+
+    <div class="dashboard-wrapper">
+        <div class="stats-header">
+            <div>
+                <h1 style="margin:0;">Personal Workspace</h1>
+                <p style="color: var(--text-secondary); margin: 5px 0 0 0;" id="snippet-count">Loading snippets...</p>
+            </div>
+            <input type="text" id="search-bar" placeholder="Search by title or language..." onkeyup="filterSnippets()">
+        </div>
+
+        <div id="snippets-grid"></div>
+        
+        <div id="no-results" class="empty-state hidden">
+            <div style="font-size: 40px;">🔍</div>
+            <p>No snippets found matching your search.</p>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = "https://codex-compiler-vxcz.onrender.com";
+        let allSnippets = [];
+
+        // Update navigation with username
+        function updateNav() {
+            const username = localStorage.getItem('username');
+            const authDiv = document.getElementById('nav-auth');
+            if (username) {
+                authDiv.innerHTML = `<span style="color: grey; margin-right:10px;">${username}</span>
+                                     <button onclick="logout()" style="background:#f85149; border:none; color:white; padding:5px 10px; border-radius:5px; cursor:pointer;">Logout</button>`;
+            } else {
+                authDiv.innerHTML = `<a href="login.html" style="background: var(--accent-color); padding: 8px 18px; border-radius: 6px; color: white; text-decoration: none;">Login</a>`;
+            }
+        }
+
+        function logout() { localStorage.clear(); window.location.href = 'login.html'; }
+
+        async function fetchSnippets() {
+            const token = localStorage.getItem('token');
+            const grid = document.getElementById('snippets-grid');
+            const countLabel = document.getElementById('snippet-count');
+
+            if (!token) {
+                grid.innerHTML = '<div class="empty-state">Please <a href="login.html" style="color:var(--accent-hover)">Login</a> to see your workspace.</div>';
+                countLabel.innerText = "Authentication required";
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/snippets`, {
+                    method: 'GET',
+                    headers: { 'Authorization': token }
+                });
+
+                if (!res.ok) throw new Error("Session Expired");
+
+                allSnippets = await res.json();
+                renderSnippets(allSnippets);
+            } catch (err) {
+                countLabel.innerText = "Error connecting to server.";
+                grid.innerHTML = '<div class="empty-state">Server is waking up or session has expired. Please try refreshing.</div>';
+            }
+        }
+
+        function renderSnippets(data) {
+            const grid = document.getElementById('snippets-grid');
+            const countLabel = document.getElementById('snippet-count');
+            countLabel.innerText = `Showing ${data.length} saved snippets`;
+            
+            if (data.length === 0) {
+                grid.innerHTML = ''; // Let the 'no-results' div handle search empty states
+                if(document.getElementById('search-bar').value === "") {
+                    grid.innerHTML = '<div class="empty-state">No snippets saved yet. Go to the Editor to create one!</div>';
+                }
+                return;
+            }
+
+            grid.innerHTML = data.map(s => `
+                <div class="snippet-card">
+                    <div style="display:flex; justify-content:space-between; color:grey; font-size:11px;">
+                        <span style="color: var(--accent-hover); font-weight:bold;">${s.language.toUpperCase()}</span>
+                        <span>${new Date(s.createdAt).toLocaleDateString()}</span>
+                    </div>
+                    <h3 style="margin:10px 0; color:white;">${s.title}</h3>
+                    <pre style="background:#000; padding:10px; border-radius:5px; height:80px; overflow:hidden; font-size:11px; border: 1px solid #222;"><code>${s.code}</code></pre>
+                    <div style="margin-top:15px; display:flex; gap:10px;">
+                        <button onclick="openInEditor(\`${encodeURIComponent(s.code)}\`, '${s.language}')" style="flex:1; background:var(--accent-color); border:none; color:white; padding:8px; border-radius:5px; cursor:pointer; font-weight:bold;">Open in Editor</button>
+                        <button onclick="deleteSnippet('${s._id}')" style="color:#f85149; border:1px solid #f85149; background:transparent; padding:8px; border-radius:5px; cursor:pointer;">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterSnippets() {
+            const query = document.getElementById('search-bar').value.toLowerCase();
+            const filtered = allSnippets.filter(s => 
+                s.title.toLowerCase().includes(query) || 
+                s.language.toLowerCase().includes(query)
+            );
+            
+            const noResults = document.getElementById('no-results');
+            if (filtered.length === 0 && query !== "") noResults.classList.remove('hidden');
+            else noResults.classList.add('hidden');
+            
+            renderSnippets(filtered);
+        }
+
+        function openInEditor(code, lang) {
+            localStorage.setItem('tempCode', decodeURIComponent(code));
+            localStorage.setItem('tempLang', lang);
+            window.location.href = 'editor.html';
+        }
+
+        async function deleteSnippet(id) {
+            const token = localStorage.getItem('token');
+            if(confirm("Are you sure you want to delete this snippet?")) {
+                try {
+                    const res = await fetch(`${API_URL}/snippets/${id}`, { 
+                        method: 'DELETE',
+                        headers: { 'Authorization': token }
+                    });
+                    if(res.ok) fetchSnippets();
+                    else alert("Delete failed. Please try again.");
+                } catch (err) {
+                    alert("Server error during deletion.");
+                }
+            }
+        }
+
+        window.onload = () => {
+            updateNav();
+            fetchSnippets();
+        };
+    </script>
+</body>
+</html>

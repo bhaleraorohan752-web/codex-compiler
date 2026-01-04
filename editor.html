@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeX Online Compiler</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+     <link rel="stylesheet" href="index.css">
+    
+</head>
+<body>
+
+<nav style="display: flex; justify-content: space-between; align-items: center; padding: 15px 60px; background: var(--card-bg); border-bottom: 1px solid var(--border-color);">
+    <div style="font-weight: bold; color: var(--accent-hover); font-size: 1.6rem; cursor: pointer;" onclick="window.location.href='index.html'">CodeX</div>
+    <div style="display: flex; gap: 30px; align-items: center;">
+        <a href="index.html" style="color: white; text-decoration: none;">Home</a>
+        <a href="editor.html" style="color: white; text-decoration: none;">Editor</a>
+        <a href="dashboard.html" style="color: white; text-decoration: none;">My Snippets</a>
+        <div id="nav-auth">
+            <a href="login.html" style="background: var(--accent-color); padding: 8px 18px; border-radius: 6px; color: white; text-decoration: none; font-weight: bold;">Login</a>
+        </div>
+    </div>
+</nav>
+
+
+
+    <div id="compiler-container">
+        <div id="header-controls">
+            <div>
+                <button onclick="saveCode()">💾 Save Code</button>
+                <button onclick="window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'})">📂 My Gallery</button>
+            </div>
+            <h2 style="margin:0; color:var(--accent-hover)">CodeX</h2>
+            <div style="display:flex; gap:10px; align-items:center;">
+                <select id="language" style="padding:7px; border-radius:5px; background:#0d1117; color:white;">
+                    <option value="c">C</option>
+                    <option value="cpp">C++</option>
+                    <option value="python">Python</option>
+                    <option value="java">Java</option>
+                </select>
+                <button id="run-btn">▶ Run Code</button>
+            </div>
+        </div>
+
+        <div id="editor"></div>
+
+        <div id="terminal-section">
+            <div class="terminal-header">
+                <span>TERMINAL</span>
+                <div style="display:flex; gap:15px; align-items:center;">
+                    <button id="ai-btn" class="hidden" onclick="getAIExplanation()" style="background:#722ed1; border:none; padding:2px 8px; font-size:10px;">🤖 AI Explain</button>
+                    <span style="color:#238636">● Active Session</span>
+                </div>
+            </div>
+            <div id="output">Output will stream here...</div>
+            <input type="text" id="terminal-input" placeholder="Enter input for your program here and press Enter...">
+        </div>
+    </div>
+
+    <div id="gallery-container">
+        <div style="display:flex; justify-content:center; align-items:center; gap:20px;">
+            <h2 style="margin:0;">📂 Saved Snippets</h2>
+            <button onclick="fetchSnippets()">🔄 Refresh List</button>
+        </div>
+        <div id="snippets-grid"></div>
+    </div>
+
+
+    
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.33.0/min/vs/loader.min.js"></script>
+    <script>
+        const socket = io('http://localhost:5000');
+        const outputDiv = document.getElementById('output');
+        const terminalInput = document.getElementById('terminal-input');
+        const aiBtn = document.getElementById('ai-btn');
+
+        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.33.0/min/vs' } });
+        require(['vs/editor/editor.main'], function () {
+            window.editor = monaco.editor.create(document.getElementById('editor'), {
+                value: `#include <stdio.h>\n\nint main() {\n    printf("Hello, World!\\n");\n    return 0;\n}`,
+                language: 'c',
+                theme: 'vs-dark',
+                automaticLayout: true // Fixes editor hiding issues
+            });
+
+            document.getElementById('language').addEventListener('change', function () {
+                monaco.editor.setModelLanguage(window.editor.getModel(), this.value);
+            });
+
+            document.getElementById('run-btn').onclick = function() {
+                outputDiv.innerText = "Connecting to secure container...\n";
+                aiBtn.classList.add('hidden'); // Reset AI button
+                socket.emit('runCode', {
+                    code: window.editor.getValue(),
+                    language: document.getElementById('language').value
+                });
+            };
+        });
+
+        // Phase 3: Real-time Output Streaming
+        socket.on('output', (data) => {
+            outputDiv.innerText += data;
+            if (data.toLowerCase().includes('error')) {
+                aiBtn.classList.remove('hidden'); // Phase 4 AI Trigger
+            }
+            outputDiv.scrollTop = outputDiv.scrollHeight;
+        });
+
+        // Phase 3: Interactive Input
+        terminalInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                socket.emit('sendInput', terminalInput.value);
+                outputDiv.innerText += terminalInput.value + "\n";
+                terminalInput.value = "";
+            }
+        });
+
+        
+
+        // Database CRUD Functions
+        async function saveCode() {
+    // 1. Check if user is logged in
+    const token = localStorage.getItem('token'); 
+    
+    if (!token) {
+        alert("Session Expired or Not Logged In. Please login to save programs.");
+        window.location.href = 'login.html';
+        return;
+    }
+
+    const title = prompt("Enter snippet title:");
+    if (!title) return;
+
+    try {
+        const res = await fetch('http://localhost:5000/save', {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': token // THIS IS THE KEY FIX
+            },
+            body: JSON.stringify({ 
+                title, 
+                code: window.editor.getValue(), 
+                language: document.getElementById('language').value 
+            })
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+            alert("Code saved successfully!");
+        } else {
+            // If the server says "Session Expired", the token is old
+            alert("Error: " + data.error);
+            if(data.error === "Session Expired") window.location.href = 'login.html';
+        }
+    } catch (err) {
+        alert("Server unreachable. Ensure Docker is running.");
+    }
+}
+
+
+
+        async function fetchSnippets() {
+            const res = await fetch('http://localhost:5000/snippets');
+            const data = await res.json();
+            const grid = document.getElementById('snippets-grid');
+            grid.innerHTML = data.map(s => `
+                <div class="snippet-card">
+                    <div style="display:flex; justify-content:space-between; color:grey; font-size:11px;">
+                        <span>${s.language.toUpperCase()}</span>
+                        <span>${new Date(s.createdAt).toLocaleDateString()}</span>
+                    </div>
+                    <h3 style="color:#58a6ff; margin:10px 0;">${s.title}</h3>
+                    <pre style="background:#000; padding:10px; border-radius:5px; height:70px; overflow:hidden; font-size:11px;"><code>${s.code}</code></pre>
+                    <div style="margin-top:15px; display:flex; gap:10px;">
+                        <button onclick="loadSnippet(\`${encodeURIComponent(s.code)}\`, '${s.language}')" style="flex:1; background:#238636; border:none;">Open</button>
+                        <button onclick="deleteSnippet('${s._id}')" style="color:#f85149; border-color:#f85149;">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function loadSnippet(code, lang) {
+            window.editor.setValue(decodeURIComponent(code));
+            document.getElementById('language').value = lang;
+            monaco.editor.setModelLanguage(window.editor.getModel(), lang);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        async function deleteSnippet(id) {
+            if(confirm("Delete permanently?")) {
+                await fetch(`http://localhost:5000/snippets/${id}`, { method: 'DELETE' });
+                fetchSnippets();
+            }
+        }
+
+        // Add this inside your window.onload or require(['vs/editor...']) in editor.html
+const savedCode = localStorage.getItem('tempCode');
+const savedLang = localStorage.getItem('tempLang');
+
+if (savedCode && savedLang) {
+    window.editor.setValue(savedCode);
+    document.getElementById('language').value = savedLang;
+    monaco.editor.setModelLanguage(window.editor.getModel(), savedLang);
+    
+    // Clear them so they don't reappear on fresh refresh
+    localStorage.removeItem('tempCode');
+    localStorage.removeItem('tempLang');
+}
+
+        window.onload = fetchSnippets;
+    </script>
+</body>
+</html>

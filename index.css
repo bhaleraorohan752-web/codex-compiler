@@ -1,0 +1,214 @@
+:root {
+    --bg-color: #0d1117;
+    --card-bg: #161b22;
+    --accent-color: #238636;
+    --accent-hover: #2ea043;
+    --text-primary: #c9d1d9;
+    --text-secondary: #8b949e;
+    --border-color: #30363d;
+    --output-bg: #010409;
+}
+
+/* Base Setup */
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    margin: 0; padding: 0;
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    overflow-y: auto; /* Allow scrolling to gallery */
+}
+
+/* SECTION 1: COMPILER IDE (Fixed Screen Height) */
+#compiler-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh; /* Exactly one full screen */
+    border-bottom: 2px solid var(--border-color);
+}
+
+#header-controls {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 20px; background: var(--card-bg);
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* THE FIX: Editor grows to fill available space */
+#editor { 
+    flex-grow: 1; 
+    width: 100%; 
+}
+
+#terminal-section {
+    height: 250px; /* Fixed terminal height */
+    background: var(--output-bg);
+    display: flex;
+    flex-direction: column;
+}
+
+.terminal-header {
+    background: #161b22; padding: 5px 20px;
+    font-size: 11px; display: flex; justify-content: space-between;
+    border-top: 1px solid var(--border-color);
+}
+
+#output {
+    flex-grow: 1; padding: 10px 20px;
+    font-family: 'Fira Code', monospace;
+    overflow-y: auto; white-space: pre-wrap; color: #58a6ff;
+}
+
+/* SECTION 2: GALLERY (Below the fold) */
+#gallery-container { 
+    padding: 60px 20px; 
+    max-width: 1200px; 
+    margin: 0 auto; 
+    text-align: center; 
+}
+
+#snippets-grid {
+    display: grid; 
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 25px; 
+    margin-top: 30px;
+}
+
+.snippet-card {
+    background: var(--card-bg); 
+    border: 1px solid var(--border-color);
+    border-radius: 12px; 
+    padding: 20px; 
+    transition: 0.3s; 
+    text-align: left;
+}
+
+.snippet-card:hover { 
+    border-color: #58a6ff; 
+    transform: translateY(-5px); 
+}
+
+
+#developers {
+    padding: 100px 20px;
+    background: #0d1117;
+    text-align: center;
+}
+
+.section-title {
+    font-size: 2rem;
+    margin-bottom: 50px;
+    color: var(--text-primary);
+    letter-spacing: 2px;
+}
+
+.dev-container {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    flex-wrap: wrap;
+}
+
+.dev-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    padding: 40px 30px;
+    border-radius: 16px;
+    width: 320px;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Hover Effect: Border glows and card lifts */
+.dev-card:hover {
+    transform: translateY(-12px);
+    border-color: var(--accent-hover);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+.dev-icon {
+    font-size: 50px;
+    margin-bottom: 20px;
+}
+
+.dev-card h3 {
+    margin: 10px 0;
+    font-size: 1.5rem;
+    color: #fff;
+}
+
+.role {
+    color: var(--accent-hover);
+    font-weight: bold;
+    font-size: 14px;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.bio {
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+.dev-tags {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.dev-tags span {
+    background: #21262d;
+    color: #8b949e;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    border: 1px solid var(--border-color);
+}
+
+
+
+/* SECTION 3: DEVELOPER CREDITS */
+#developer-credits { 
+    background: #090c10; 
+    padding: 80px 20px; 
+    text-align: center; 
+    border-top: 1px solid var(--border-color); 
+}
+
+.dev-cards { 
+    display: flex; 
+    justify-content: center; 
+    gap: 40px; 
+    margin-top: 30px; 
+}
+
+.dev-profile { 
+    background: #161b22; 
+    padding: 30px; 
+    border-radius: 15px; 
+    width: 220px; 
+    border: 1px solid #30363d; 
+    transition: 0.3s; 
+}
+
+.dev-profile:hover { 
+    border-color: var(--accent-color); 
+    transform: translateY(-10px); 
+}
+
+/* Interactive Elements */
+button {
+    cursor: pointer; border-radius: 6px; padding: 8px 16px;
+    border: 1px solid var(--border-color); background: #21262d; color: white;
+}
+
+#run-btn { 
+    background: var(--accent-color); 
+    border: none; 
+    font-weight: bold; 
+}
+
+.hidden { display: none !important; }

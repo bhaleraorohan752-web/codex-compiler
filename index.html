@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeX | Cloud IDE Platform</title>
+    <link rel="stylesheet" href="index.css">
+    <style>
+        /* Landing Page Specific Styles */
+        .hero {
+            height: 80vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: radial-gradient(circle at center, #1e2631 0%, #0d1117 100%);
+            padding: 20px;
+        }
+
+        .hero h1 {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    background: linear-gradient(to right, #2ea043, #58a6ff);
+    
+    /* Order matters: Prefix first, then standard */
+    -webkit-background-clip: text; 
+    background-clip: text; 
+    
+    /* This is required for the text to actually show the gradient */
+    -webkit-text-fill-color: transparent; 
+    color: transparent; /* Fallback for standard browsers */
+}
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin-bottom: 40px;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+        }
+
+        .btn-primary {
+            background: var(--accent-color);
+            padding: 15px 35px;
+            font-size: 1.1rem;
+            border: none;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+            transform: scale(1.05);
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: space-around;
+            padding: 40px;
+            background: var(--card-bg);
+            border-top: 1px solid var(--border-color);
+        }
+    </style>
+</head>
+<body>
+
+    <nav style="display: flex; justify-content: space-between; align-items: center; padding: 15px 60px; background: var(--card-bg); border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 1000;">
+    <div style="font-weight: bold; color: var(--accent-hover); font-size: 1.6rem; cursor: pointer;" onclick="window.location.href='index.html'">
+        CodeX
+    </div>
+    
+    <div style="display: flex; gap: 30px; align-items: center;">
+        <a href="index.html" style="color: white; text-decoration: none; font-weight: 500;">Home</a>
+        <a href="editor.html" style="color: white; text-decoration: none; font-weight: 500;">Editor</a>
+        <a href="dashboard.html" style="color: white; text-decoration: none; font-weight: 500;">My Snippets</a>
+        <a href="docs.html" style="color: white; text-decoration: none; font-weight: 500;">Docs</a>
+        
+        <div id="nav-auth-section">
+            <a href="login.html" style="background: var(--accent-color); padding: 8px 20px; border-radius: 6px; color: white; text-decoration: none; font-weight: bold; font-size: 14px; transition: 0.3s;" onmouseover="this.style.background='var(--accent-hover)'" onmouseout="this.style.background='var(--accent-color)'">
+                Login
+            </a>
+        </div>
+    </div>
+</nav>
+
+<script>
+    // Script to handle logged-in state in the Navbar
+    function updateNavbar() {
+        const username = localStorage.getItem('username');
+        const authSection = document.getElementById('nav-auth-section');
+
+        if (username) {
+            authSection.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <span style="color: var(--text-secondary); font-size: 14px;">Hi, ${username}</span>
+                    <button onclick="handleLogout()" style="background: #f85149; border: none; padding: 8px 15px; color: white; border-radius: 6px; cursor: pointer; font-weight: bold;">
+                        Logout
+                    </button>
+                </div>
+            `;
+        }
+    }
+
+    function handleLogout() {
+        localStorage.clear(); // Clears token and username
+        window.location.href = 'index.html';
+    }
+
+    // Run on page load
+    updateNavbar();
+</script>
+
+    <section class="hero">
+        <h1>Compile Without Limits.</h1>
+        <p>A high-performance, browser-based IDE for modern developers. Secure execution, real-time interactivity, and seamless cloud storage—all in one place.</p>
+        <div class="cta-buttons">
+            <a href="editor.html" class="btn-primary">Start Coding Now</a>
+            <a href="docs.html" style="color: white; text-decoration: none; padding: 15px 35px; border: 1px solid var(--border-color); border-radius: 8px;">Read Docs</a>
+        </div>
+    </section>
+
+    <section class="stats-bar">
+        <div>
+            <h3 style="margin:0; color: #58a6ff;">4+</h3>
+            <p style="margin:0; font-size: 12px; color: grey;">Languages</p>
+        </div>
+        <div>
+            <h3 style="margin:0; color: #2ea043;">100%</h3>
+            <p style="margin:0; font-size: 12px; color: grey;">Docker Secure</p>
+        </div>
+        <div>
+            <h3 style="margin:0; color: #f0883e;">Active</h3>
+            <p style="margin:0; font-size: 12px; color: grey;">Real-time Terminal</p>
+        </div>
+    </section>
+
+    <section id="developers">
+    <h2 class="section-title">Developed By</h2>
+    <div class="dev-container">
+        <div class="dev-card">
+            <div class="dev-icon">👨‍💻</div>
+            <h3>Rohan</h3>
+            <p class="role">Backend & DevOps Lead</p>
+            <p class="bio">Architected the secure Docker sandboxing and real-time streaming infrastructure.</p>
+            <div class="dev-tags">
+                <span>Node.js</span>
+                <span>Docker</span>
+                <span>MongoDB</span>
+            </div>
+        </div>
+
+        <div class="dev-card">
+            <div class="dev-icon">🎨</div>
+            <h3>Sanket</h3>
+            <p class="role">UI & Frontend Specialist</p>
+            <p class="bio">Designed the responsive IDE interface and Monaco Editor integration.</p>
+            <div class="dev-tags">
+                <span>HTML5/CSS3</span>
+                <span>JavaScript</span>
+                <span>Monaco</span>
+            </div>
+        </div>
+    </div>
+    
+    <footer style="margin-top: 80px; padding: 20px; color: var(--text-secondary); font-size: 13px;">
+        &copy; 2026 CodeX Compiler | All Rights Reserved
+    </footer>
+</section>
+
+
+</body>
+</html>
