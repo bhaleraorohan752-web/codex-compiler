@@ -1,26 +1,26 @@
-# 1. Use an official Node.js image as the base
+# Use a base image that includes build tools
 FROM node:18
 
-# 2. Install compilers (GCC for C/C++, Default JDK for Java, Python is already in Node image)
+# Install Python and GCC (for C/C++)
 RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip \
     gcc \
     g++ \
-    default-jdk \
-    python3 \
     && rm -rf /var/lib/apt/lists/*
 
-# 3. Create app directory
-WORKDIR /app
+# Install popular Python libraries
+RUN pip3 install --no-cache-dir \
+    numpy \
+    pandas \
+    requests \
+    matplotlib \
+    scipy
 
-# 4. Copy package files and install dependencies
+# Rest of your Dockerfile (COPY, EXPOSE, CMD)
+WORKDIR /app
 COPY package*.json ./
 RUN npm install
-
-# 5. Copy the rest of your backend code
 COPY . .
-
-# 6. Expose the port your server runs on
 EXPOSE 5000
-
-# 7. Start the server
 CMD ["node", "index.js"]
