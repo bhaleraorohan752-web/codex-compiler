@@ -8,8 +8,8 @@ RUN apt-get update && apt-get install -y \
     g++ \
     && rm -rf /var/lib/apt/lists/*
 
-# Install ONLY small, essential packages to avoid memory crashes
-RUN pip3 install --no-cache-dir requests numpy
+# Fix for PEP 668: Added --break-system-packages flag
+RUN pip3 install --no-cache-dir --break-system-packages requests numpy
 
 WORKDIR /app
 COPY package*.json ./
